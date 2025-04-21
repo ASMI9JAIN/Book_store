@@ -1,0 +1,34 @@
+name: Create Release on Tag
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  create-draft-release:
+    if: ${{ vars.AUTO_RELEASE_GENERATION_WORKFLOW_ENABLED != 'false' }}
+    runs-on: macos-latest
+
+    steps:
+      - name: 🔍 Check Workflow Control Flag
+        run: |
+          echo "AUTO_RELEASE_GENERATION_WORKFLOW_ENABLED = ${{ vars.AUTO_RELEASE_GENERATION_WORKFLOW_ENABLED }}"
+      - name: Log Tag Info
+        run: |
+          echo "🎯 Triggered by tag: ${{ github.ref }}"
+          echo "📝 Ref name (tag_name): ${{ github.ref_name }}"
+          echo "🚀 Repository: ${{ github.repository }}"
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: ✅ Confirm Completion
+        run: |
+          echo "🎉 Release for tag ${{ github.ref_name }} created successfully!"
